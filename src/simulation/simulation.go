@@ -52,7 +52,7 @@ func New(H, cols, rows, width, height float32) *Simulation {
 		H: H,
 
 		RestDens:  1000,
-		Stiffness: -2000,
+		Stiffness: -7000,
 
 		Visc: 200,
 

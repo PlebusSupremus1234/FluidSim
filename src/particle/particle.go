@@ -30,7 +30,7 @@ func New(x, y float32, index, T int) *Particle {
 
 		Rho: 0,
 		P:   0,
-		M:   2.5,
+		M:   3,
 
 		Index: index,
 		T:     T,

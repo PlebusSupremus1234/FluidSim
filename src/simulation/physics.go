@@ -30,7 +30,7 @@ func (s *Simulation) computeDensityPressure() {
 		density += s.Poly6(0) // Self
 
 		Pi.Rho = Pi.M * density
-		Pi.P = s.Stiffness * (density - s.RestDens)
+		Pi.P = s.Stiffness * (density/s.RestDens - 1)
 	}
 }
 
@@ -54,7 +54,8 @@ func (s *Simulation) computeForces() {
 			Wvisc := s.ViscLap(mag)
 
 			// Compute pressure force
-			multiplierP := (Pi.P + Pj.P) / (2 * Pj.Rho) * Wspiky
+			multiplierP := (Pi.P/(Pi.Rho*Pi.Rho) + Pj.P/(Pj.Rho*Pj.Rho)) * Wspiky
+
 			Fpress = rl.Vector2Add(Fpress, rl.Vector2Scale(normalized, multiplierP))
 
 			// Compute viscosity force
@@ -76,12 +77,11 @@ func (s *Simulation) computeForces() {
 			Wspiky := s.SpikyGrad(mag)
 
 			// Compute pressure force
-			multiplierP := (Pi.P + Pj.P) / (2 * Pj.Rho) * Wspiky
-
+			multiplierP := (Pi.P/(Pi.Rho*Pi.Rho) + Pj.P/(Pj.Rho*Pj.Rho)) * Wspiky
 			Fpress = rl.Vector2Add(Fpress, rl.Vector2Scale(normalized, multiplierP))
 		}
 
-		Fpress = rl.Vector2Scale(Fpress, -Pi.M)
+		Fpress = rl.Vector2Scale(Fpress, -Pi.M*Pi.M)
 		Fvisc = rl.Vector2Scale(Fvisc, s.Visc)
 		Fgravity := rl.Vector2Scale(s.Gravity, Pi.M/Pi.Rho)
 
