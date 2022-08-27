@@ -1,7 +1,7 @@
 package simulation
 
 import (
-	"github.com/PlebusSupremus1234/Fluid-Simulation/src/particle"
+	"github.com/PlebusSupremus1234/FluidSim/src/particle"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -13,10 +13,8 @@ func (s *Simulation) computeDensityPressure() {
 			rij := rl.Vector2Subtract(Pj.X, Pi.X)
 			magSq := rl.Vector2LenSqr(rij)
 
-			if magSq <= s.H*s.H {
-				Wij := s.Poly6(magSq)
-				density += Pj.M * Wij
-			}
+			Wij := s.Poly6(magSq)
+			density += Pj.M * Wij
 		}
 
 		density += Pi.M * s.Poly6(0) // Self
@@ -36,30 +34,25 @@ func (s *Simulation) computeForces() {
 			rij := rl.Vector2Subtract(Pi.X, Pj.X)
 			mag := rl.Vector2Length(rij)
 
-			if mag != 0 && mag <= s.H {
-				normalized := rl.Vector2Normalize(rij)
-				vij := rl.Vector2Subtract(Pj.V, Pi.V)
+			normalized := rl.Vector2Normalize(rij)
+			vij := rl.Vector2Subtract(Pj.V, Pi.V)
 
-				Wpoly := s.Poly6(mag)
-				Wspiky := s.SpikyGrad(mag)
-				Wvisc := s.ViscLap(mag)
+			Wpoly := s.Poly6(mag)
+			Wspiky := s.SpikyGrad(mag)
+			Wvisc := s.ViscLap(mag)
 
-				// Compute pressure force
-				multiplierP := Pj.M * (Pi.P + Pj.P) / (2 * Pj.Rho) * Wspiky
-				Fpress = rl.Vector2Add(Fpress, rl.Vector2Scale(normalized, multiplierP))
+			// Compute pressure force
+			multiplierP := Pj.M * (Pi.P + Pj.P) / (2 * Pj.Rho) * Wspiky
+			Fpress = rl.Vector2Add(Fpress, rl.Vector2Scale(normalized, multiplierP))
 
-				// Compute viscosity force
-				// multiplierV := Pj.M / Pj.Rho * Wvisc
-				// Fvisc = rl.Vector2Add(Fvisc, rl.Vector2Scale(velDifference, multiplierV))
+			// Compute viscosity force
+			multiplierV := Pj.M / Pj.Rho * Wvisc
+			Fvisc = rl.Vector2Add(Fvisc, rl.Vector2Scale(vij, multiplierV))
 
-				multiplierV := Pj.M / Pj.Rho * Wvisc
-				Fvisc = rl.Vector2Add(Fvisc, rl.Vector2Scale(vij, multiplierV))
-
-				// Compute surface tension force
-				K := 2 * s.RestDens / (Pi.Rho + Pj.Rho) // Symmetric factor that amplifies the forces at the surface
-				multiplierC := K * -s.Cohe * Pi.M * Pj.M * Wpoly
-				Fsurf = rl.Vector2Add(Fsurf, rl.Vector2Scale(normalized, multiplierC))
-			}
+			// Compute surface tension force
+			K := 2 * s.RestDens / (Pi.Rho + Pj.Rho) // Symmetric factor that amplifies the forces at the surface
+			multiplierC := K * -s.Cohe * Pi.M * Pj.M * Wpoly
+			Fsurf = rl.Vector2Add(Fsurf, rl.Vector2Scale(normalized, multiplierC))
 		}
 
 		Fvisc = rl.Vector2Scale(Fvisc, s.Visc)
@@ -77,21 +70,21 @@ func (s *Simulation) integrate() {
 			p.X = rl.Vector2Add(p.X, rl.Vector2Scale(p.V, s.DT))
 		}
 
-		// if p.X.X-s.EPS < 0 {
+		// if p.X.X-s.Eps < 0 {
 		// 	p.V.X *= s.BoundDamping
-		// 	p.X.X = s.EPS
+		// 	p.X.X = s.Eps
 		// }
-		// if p.X.X+s.EPS > s.VIEW_WIDTH {
+		// if p.X.X+s.Eps > s.VIEW_WIDTH {
 		// 	p.V.X *= s.BoundDamping
-		// 	p.X.X = s.VIEW_WIDTH - s.EPS
+		// 	p.X.X = s.VIEW_WIDTH - s.Eps
 		// }
-		// if p.X.Y-s.EPS < 0 {
+		// if p.X.Y-s.Eps < 0 {
 		// 	p.V.Y *= s.BoundDamping
-		// 	p.X.Y = s.EPS
+		// 	p.X.Y = s.Eps
 		// }
-		// if p.X.Y+s.EPS > s.VIEW_HEIGHT {
+		// if p.X.Y+s.Eps > s.VIEW_HEIGHT {
 		// 	p.V.Y *= s.BoundDamping
-		// 	p.X.Y = s.VIEW_HEIGHT - s.EPS
+		// 	p.X.Y = s.VIEW_HEIGHT - s.Eps
 		// }
 	}
 }

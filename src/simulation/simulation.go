@@ -3,14 +3,14 @@ package simulation
 import (
 	"math"
 
-	"github.com/PlebusSupremus1234/Fluid-Simulation/src/particle"
+	"github.com/PlebusSupremus1234/FluidSim/src/particle"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 type Simulation struct {
-	particles  []*particle.Particle     // Simulation particles
-	neighbours [][]*particle.Particle   // Neighbours for each particle
-	grid       [][][]*particle.Particle // Grid for faster neighbour lookup
+	particles  []*particle.Particle         // Simulation particles
+	neighbours map[int][]*particle.Particle // Neighbours for each particle
+	grid       [][][]*particle.Particle     // Grid for faster neighbour lookup
 
 	H float32 // Radius
 
@@ -29,7 +29,7 @@ type Simulation struct {
 	SpikyGradF float32
 	ViscLapF   float32
 
-	EPS          float32 // Boundary epsilon
+	Eps          float32 // Boundary epsilon
 	BoundDamping float32 // Boundary damping
 
 	ViewWidth  float32 // View width
@@ -46,7 +46,7 @@ func New(H, cols, rows, width, height float32) *Simulation {
 
 	return &Simulation{
 		particles:  particles,
-		neighbours: [][]*particle.Particle{},
+		neighbours: make(map[int][]*particle.Particle),
 		grid:       [][][]*particle.Particle{},
 
 		H: H,
@@ -65,7 +65,7 @@ func New(H, cols, rows, width, height float32) *Simulation {
 		SpikyGradF: -30 / float32(math.Pi*math.Pow(Hf64, 5)),
 		ViscLapF:   40 / float32(math.Pi*math.Pow(Hf64, 5)),
 
-		EPS:          H,
+		Eps:          H,
 		BoundDamping: -0.5,
 
 		ViewWidth:  width,

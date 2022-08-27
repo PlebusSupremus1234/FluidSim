@@ -1,4 +1,4 @@
-module github.com/PlebusSupremus1234/Fluid-Simulation
+module github.com/PlebusSupremus1234/FluidSim
 
 go 1.18
 

@@ -3,7 +3,7 @@ package simulation
 import (
 	"math"
 
-	"github.com/PlebusSupremus1234/Fluid-Simulation/src/particle"
+	"github.com/PlebusSupremus1234/FluidSim/src/particle"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -84,9 +84,9 @@ func (s *Simulation) FindGridNeighbours(P *particle.Particle) []*particle.Partic
 		found = append(found, s.grid[indexY+1][indexX+1]...)
 	}
 
-	for _, Pi := range s.grid[indexY][indexX] {
-		if Pi != P {
-			found = append(found, Pi)
+	for _, p := range s.grid[indexY][indexX] {
+		if p != P {
+			found = append(found, p)
 		}
 	}
 
@@ -94,20 +94,16 @@ func (s *Simulation) FindGridNeighbours(P *particle.Particle) []*particle.Partic
 }
 
 func (s *Simulation) UpdateNeighbours() {
-	var newNeighbours [][]*particle.Particle
-
-	for range s.particles {
-		newNeighbours = append(newNeighbours, []*particle.Particle{})
-	}
+	newNeighbours := make(map[int][]*particle.Particle)
 
 	for i, Pi := range s.particles {
-		neighbours := s.FindGridNeighbours(Pi)
+		newNeighbours[i] = []*particle.Particle{}
 
-		for _, Pj := range neighbours {
+		for _, Pj := range s.FindGridNeighbours(Pi) {
 			rij := rl.Vector2Subtract(Pi.X, Pj.X)
 			mag := rl.Vector2Length(rij)
 
-			if mag < s.H {
+			if mag <= s.H {
 				newNeighbours[i] = append(newNeighbours[i], Pj)
 			}
 		}

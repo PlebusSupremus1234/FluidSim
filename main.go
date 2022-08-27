@@ -1,7 +1,7 @@
 package main
 
 import (
-	sim "github.com/PlebusSupremus1234/Fluid-Simulation/src/simulation"
+	sim "github.com/PlebusSupremus1234/FluidSim/src/simulation"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 

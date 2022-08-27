@@ -3,7 +3,7 @@ package simulation
 import (
 	"math/rand"
 
-	"github.com/PlebusSupremus1234/Fluid-Simulation/src/particle"
+	"github.com/PlebusSupremus1234/FluidSim/src/particle"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -67,8 +67,8 @@ func (s *Simulation) SpawnParticles() {
 			x := mX + float32(j)*s.H + rand.Float32()
 			y := mY + float32(i)*s.H + rand.Float32()
 
-			badX := (x+s.EPS > s.ViewWidth) || (x-s.EPS < 0)
-			badY := (y+s.EPS > s.ViewHeight) || (y-s.EPS < 0)
+			badX := (x+s.Eps > s.ViewWidth) || (x-s.Eps < 0)
+			badY := (y+s.Eps > s.ViewHeight) || (y-s.Eps < 0)
 
 			if !badX && !badY {
 				newParticle := particle.New(
