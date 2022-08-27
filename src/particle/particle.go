@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	PARTICLE = iota
-	BOUNDARY
+	Fluid = iota
+	Bound
 )
 
 type Particle struct {

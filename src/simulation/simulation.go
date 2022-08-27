@@ -8,9 +8,9 @@ import (
 )
 
 type Simulation struct {
-	particles  []*particle.Particle         // Simulation particles
-	neighbours map[int][]*particle.Particle // Neighbours for each particle
-	grid       [][][]*particle.Particle     // Grid for faster neighbour lookup
+	particles  []*particle.Particle     // Simulation particles
+	neighbours map[int]Neighbours       // Neighbours for each particle
+	grid       [][][]*particle.Particle // Grid for faster neighbour lookup
 
 	H float32 // Radius
 
@@ -46,13 +46,13 @@ func New(H, cols, rows, width, height float32) *Simulation {
 
 	return &Simulation{
 		particles:  particles,
-		neighbours: make(map[int][]*particle.Particle),
+		neighbours: make(map[int]Neighbours),
 		grid:       [][][]*particle.Particle{},
 
 		H: H,
 
 		RestDens:  1000,
-		Stiffness: 2000,
+		Stiffness: -2000,
 
 		Visc: 200,
 

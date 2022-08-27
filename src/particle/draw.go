@@ -11,7 +11,7 @@ func (p *Particle) Draw() {
 	y := int32(math.Round(float64(p.X.Y)))
 
 	color := rl.Blue
-	if p.T == BOUNDARY {
+	if p.T == Bound {
 		color = rl.Gray
 	}
 

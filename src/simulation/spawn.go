@@ -19,7 +19,7 @@ func initParticles(H, cols, rows float32) []*particle.Particle {
 
 				len(particles), // Index
 
-				particle.PARTICLE, // Type
+				particle.Fluid, // Type
 			))
 		}
 	}
@@ -36,7 +36,7 @@ func initParticles(H, cols, rows float32) []*particle.Particle {
 
 				len(particles),
 
-				particle.BOUNDARY,
+				particle.Bound,
 			))
 		}
 	}
@@ -50,7 +50,7 @@ func initParticles(H, cols, rows float32) []*particle.Particle {
 				x, y,
 
 				len(particles),
-				particle.BOUNDARY,
+				particle.Bound,
 			))
 		}
 	}
@@ -76,7 +76,7 @@ func (s *Simulation) SpawnParticles() {
 
 					len(s.particles),
 
-					particle.PARTICLE,
+					particle.Fluid,
 				)
 
 				s.particles = append(s.particles, newParticle)
