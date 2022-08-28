@@ -7,30 +7,30 @@ import (
 
 func (s *Simulation) computeDensityPressure() {
 	for _, i := range s.particles {
-		var fluid float32 = 0
-		var bound float32 = 0
+		var densityF float32 = 0
+		var densityB float32 = 0
 
 		neighbours := s.neighbours[i.Index]
 
 		for _, j := range neighbours.Fluid {
-			rij := rl.Vector2Subtract(j.X, i.X)
+			rij := rl.Vector2Subtract(i.X, j.X)
 			magSq := rl.Vector2LenSqr(rij)
 
 			Wij := s.Poly6(magSq)
-			fluid += Wij
+			densityF += Wij
 		}
 
-		fluid += s.Poly6(0) // Self
+		densityF += s.Poly6(0) // Self
 
 		for _, k := range neighbours.Bound {
-			rij := rl.Vector2Subtract(k.X, i.X)
-			magSq := rl.Vector2LenSqr(rij)
+			rik := rl.Vector2Subtract(i.X, k.X)
+			magSq := rl.Vector2LenSqr(rik)
 
-			Wij := s.Poly6(magSq)
-			bound += Wij
+			Wik := s.Poly6(magSq)
+			densityB += Wik
 		}
 
-		density := i.M*fluid + i.M*bound
+		density := i.M*densityF + i.M*densityB
 
 		i.Rho = density
 		i.P = s.Stiffness * (density/s.RestDens - 1)
@@ -39,7 +39,9 @@ func (s *Simulation) computeDensityPressure() {
 
 func (s *Simulation) computeForces() {
 	for _, i := range s.particles {
-		Fpress := rl.Vector2Zero()
+		FpressF := rl.Vector2Zero()
+		FpressB := rl.Vector2Zero()
+
 		Fvisc := rl.Vector2Zero()
 		Fsurf := rl.Vector2Zero()
 
@@ -50,7 +52,7 @@ func (s *Simulation) computeForces() {
 			mag := rl.Vector2Length(rij)
 
 			normalized := rl.Vector2Normalize(rij)
-			vij := rl.Vector2Subtract(j.V, i.V)
+			vji := rl.Vector2Subtract(j.V, i.V)
 
 			Wpoly := s.Poly6(mag)
 			Wspiky := s.SpikyGrad(mag)
@@ -58,12 +60,11 @@ func (s *Simulation) computeForces() {
 
 			// Compute pressure force
 			multiplierP := (i.P/(i.Rho*i.Rho) + j.P/(j.Rho*j.Rho)) * Wspiky
-
-			Fpress = rl.Vector2Add(Fpress, rl.Vector2Scale(normalized, multiplierP))
+			FpressF = rl.Vector2Add(FpressF, rl.Vector2Scale(normalized, multiplierP))
 
 			// Compute viscosity force
 			multiplierV := j.M / j.Rho * Wvisc
-			Fvisc = rl.Vector2Add(Fvisc, rl.Vector2Scale(vij, multiplierV))
+			Fvisc = rl.Vector2Add(Fvisc, rl.Vector2Scale(vji, multiplierV))
 
 			// Compute surface tension force
 			K := 2 * s.RestDens / (i.Rho + j.Rho) // Symmetric factor that amplifies the forces at the surface
@@ -72,19 +73,23 @@ func (s *Simulation) computeForces() {
 		}
 
 		for _, k := range neighbours.Bound {
-			rij := rl.Vector2Subtract(i.X, k.X)
-			mag := rl.Vector2Length(rij)
+			rik := rl.Vector2Subtract(i.X, k.X)
+			mag := rl.Vector2Length(rik)
 
-			normalized := rl.Vector2Normalize(rij)
+			normalized := rl.Vector2Normalize(rik)
 
 			Wspiky := s.SpikyGrad(mag)
 
 			// Compute pressure force
-			multiplierP := (i.P/(i.Rho*i.Rho) + k.P/(k.Rho*k.Rho)) * Wspiky
-			Fpress = rl.Vector2Add(Fpress, rl.Vector2Scale(normalized, multiplierP))
+			multiplier := (i.P/(i.Rho*i.Rho) + k.P/(k.Rho*k.Rho)) * Wspiky
+			FpressB = rl.Vector2Add(FpressB, rl.Vector2Scale(normalized, multiplier))
 		}
 
-		Fpress = rl.Vector2Scale(Fpress, -i.M*i.M)
+		FpressF = rl.Vector2Scale(FpressF, -i.M*i.M)
+		FpressB = rl.Vector2Scale(FpressB, -i.M*i.M)
+		Fpress := rl.Vector2Add(FpressF, FpressB)
+		// FpressB for the boundary particles is sometimes NaN
+
 		Fvisc = rl.Vector2Scale(Fvisc, s.Visc)
 		Fgravity := rl.Vector2Scale(s.Gravity, i.M/i.Rho)
 

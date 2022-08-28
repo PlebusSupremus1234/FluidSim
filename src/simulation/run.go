@@ -1,8 +1,7 @@
 package simulation
 
 import (
-	"fmt"
-	rl "github.com/gen2brain/raylib-go/raylib"
+	"github.com/PlebusSupremus1234/FluidSim/src/renderer"
 )
 
 func (s *Simulation) Run() {
@@ -21,15 +20,6 @@ func (s *Simulation) Run() {
 	// Integration
 	s.integrate()
 
-	// Draw particles
-	s.Draw()
-
-	// Stats
-	rl.DrawText(fmt.Sprintf("FPS: %.2f", rl.GetFPS()), 10, 10, 10, rl.White)
-}
-
-func (s *Simulation) Draw() {
-	for _, i := range s.particles {
-		i.Draw()
-	}
+	// Render particles
+	renderer.Draw(s.particles)
 }

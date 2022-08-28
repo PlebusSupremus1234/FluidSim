@@ -42,10 +42,10 @@ func initParticles(H, cols, rows float32) ([]*particle.Particle, int) {
 	}
 
 	// Left and right
-	for i := 0; float32(i) < 2*rows; i++ {
+	for i := 0; float32(i) < 2*rows-1; i++ {
 		for j := 0; j < 2; j++ {
 			x := H/4 + float32(j)*(cols*H-H/2)
-			y := H/4 + float32(i)*H/2
+			y := H/2 + float32(i)*H/2
 			particles = append(particles, particle.New(
 				x, y,
 
