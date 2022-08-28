@@ -6,70 +6,73 @@ import (
 )
 
 func (s *Simulation) computeDensityPressure() {
-	for i, Pi := range s.particles {
-		var density float32 = 0
+	for _, i := range s.particles {
+		var fluid float32 = 0
+		var bound float32 = 0
 
-		neighbours := s.neighbours[i]
+		neighbours := s.neighbours[i.Index]
 
-		for _, Pj := range neighbours.Fluid {
-			rij := rl.Vector2Subtract(Pj.X, Pi.X)
+		for _, j := range neighbours.Fluid {
+			rij := rl.Vector2Subtract(j.X, i.X)
 			magSq := rl.Vector2LenSqr(rij)
 
 			Wij := s.Poly6(magSq)
-			density += Wij
+			fluid += Wij
 		}
 
-		for _, Pj := range neighbours.Bound {
-			rij := rl.Vector2Subtract(Pj.X, Pi.X)
+		fluid += s.Poly6(0) // Self
+
+		for _, k := range neighbours.Bound {
+			rij := rl.Vector2Subtract(k.X, i.X)
 			magSq := rl.Vector2LenSqr(rij)
 
 			Wij := s.Poly6(magSq)
-			density += Wij
+			bound += Wij
 		}
 
-		density += s.Poly6(0) // Self
+		density := i.M*fluid + i.M*bound
 
-		Pi.Rho = Pi.M * density
-		Pi.P = s.Stiffness * (density/s.RestDens - 1)
+		i.Rho = density
+		i.P = s.Stiffness * (density/s.RestDens - 1)
 	}
 }
 
 func (s *Simulation) computeForces() {
-	for i, Pi := range s.particles {
+	for _, i := range s.particles {
 		Fpress := rl.Vector2Zero()
 		Fvisc := rl.Vector2Zero()
 		Fsurf := rl.Vector2Zero()
 
-		neighbours := s.neighbours[i]
+		neighbours := s.neighbours[i.Index]
 
-		for _, Pj := range neighbours.Fluid {
-			rij := rl.Vector2Subtract(Pi.X, Pj.X)
+		for _, j := range neighbours.Fluid {
+			rij := rl.Vector2Subtract(i.X, j.X)
 			mag := rl.Vector2Length(rij)
 
 			normalized := rl.Vector2Normalize(rij)
-			vij := rl.Vector2Subtract(Pj.V, Pi.V)
+			vij := rl.Vector2Subtract(j.V, i.V)
 
 			Wpoly := s.Poly6(mag)
 			Wspiky := s.SpikyGrad(mag)
 			Wvisc := s.ViscLap(mag)
 
 			// Compute pressure force
-			multiplierP := (Pi.P/(Pi.Rho*Pi.Rho) + Pj.P/(Pj.Rho*Pj.Rho)) * Wspiky
+			multiplierP := (i.P/(i.Rho*i.Rho) + j.P/(j.Rho*j.Rho)) * Wspiky
 
 			Fpress = rl.Vector2Add(Fpress, rl.Vector2Scale(normalized, multiplierP))
 
 			// Compute viscosity force
-			multiplierV := Pj.M / Pj.Rho * Wvisc
+			multiplierV := j.M / j.Rho * Wvisc
 			Fvisc = rl.Vector2Add(Fvisc, rl.Vector2Scale(vij, multiplierV))
 
 			// Compute surface tension force
-			K := 2 * s.RestDens / (Pi.Rho + Pj.Rho) // Symmetric factor that amplifies the forces at the surface
-			multiplierC := K * -s.Cohe * Pi.M * Pj.M * Wpoly
+			K := 2 * s.RestDens / (i.Rho + j.Rho) // Symmetric factor that amplifies the forces at the surface
+			multiplierC := K * -s.Cohe * i.M * j.M * Wpoly
 			Fsurf = rl.Vector2Add(Fsurf, rl.Vector2Scale(normalized, multiplierC))
 		}
 
-		for _, Pj := range neighbours.Bound {
-			rij := rl.Vector2Subtract(Pi.X, Pj.X)
+		for _, k := range neighbours.Bound {
+			rij := rl.Vector2Subtract(i.X, k.X)
 			mag := rl.Vector2Length(rij)
 
 			normalized := rl.Vector2Normalize(rij)
@@ -77,41 +80,41 @@ func (s *Simulation) computeForces() {
 			Wspiky := s.SpikyGrad(mag)
 
 			// Compute pressure force
-			multiplierP := (Pi.P/(Pi.Rho*Pi.Rho) + Pj.P/(Pj.Rho*Pj.Rho)) * Wspiky
+			multiplierP := (i.P/(i.Rho*i.Rho) + k.P/(k.Rho*k.Rho)) * Wspiky
 			Fpress = rl.Vector2Add(Fpress, rl.Vector2Scale(normalized, multiplierP))
 		}
 
-		Fpress = rl.Vector2Scale(Fpress, -Pi.M*Pi.M)
+		Fpress = rl.Vector2Scale(Fpress, -i.M*i.M)
 		Fvisc = rl.Vector2Scale(Fvisc, s.Visc)
-		Fgravity := rl.Vector2Scale(s.Gravity, Pi.M/Pi.Rho)
+		Fgravity := rl.Vector2Scale(s.Gravity, i.M/i.Rho)
 
 		sum := rl.Vector2Add(Fpress, rl.Vector2Add(Fvisc, rl.Vector2Add(Fsurf, Fgravity)))
-		Pi.A = sum
+		i.A = sum
 	}
 }
 
 func (s *Simulation) integrate() {
-	for _, p := range s.particles {
-		if p.T == particle.Fluid {
-			p.V = rl.Vector2Add(p.V, rl.Vector2Scale(p.A, s.DT/p.Rho))
-			p.X = rl.Vector2Add(p.X, rl.Vector2Scale(p.V, s.DT))
+	for _, i := range s.particles {
+		if i.T == particle.Fluid {
+			i.V = rl.Vector2Add(i.V, rl.Vector2Scale(i.A, s.DT/i.Rho))
+			i.X = rl.Vector2Add(i.X, rl.Vector2Scale(i.V, s.DT))
 		}
 
-		//if p.X.X-s.Eps < 0 {
-		//	p.V.X *= s.BoundDamping
-		//	p.X.X = s.Eps
+		//if i.X.X-s.Eps < 0 {
+		//	i.V.X *= s.BoundDamping
+		//	i.X.X = s.Eps
 		//}
-		//if p.X.X+s.Eps > s.ViewWidth {
-		//	p.V.X *= s.BoundDamping
-		//	p.X.X = s.ViewWidth - s.Eps
+		//if i.X.X+s.Eps > s.ViewWidth {
+		//	i.V.X *= s.BoundDamping
+		//	i.X.X = s.ViewWidth - s.Eps
 		//}
-		//if p.X.Y-s.Eps < 0 {
-		//	p.V.Y *= s.BoundDamping
-		//	p.X.Y = s.Eps
+		//if i.X.Y-s.Eps < 0 {
+		//	i.V.Y *= s.BoundDamping
+		//	i.X.Y = s.Eps
 		//}
-		//if p.X.Y+s.Eps > s.ViewHeight {
-		//	p.V.Y *= s.BoundDamping
-		//	p.X.Y = s.ViewHeight - s.Eps
+		//if i.X.Y+s.Eps > s.ViewHeight {
+		//	i.V.Y *= s.BoundDamping
+		//	i.X.Y = s.ViewHeight - s.Eps
 		//}
 	}
 }

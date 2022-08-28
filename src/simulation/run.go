@@ -29,7 +29,7 @@ func (s *Simulation) Run() {
 }
 
 func (s *Simulation) Draw() {
-	for _, p := range s.particles {
-		p.Draw()
+	for _, i := range s.particles {
+		i.Draw()
 	}
 }

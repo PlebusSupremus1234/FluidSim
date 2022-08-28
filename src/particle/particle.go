@@ -18,7 +18,7 @@ type Particle struct {
 	P   float32 // Pressure
 	M   float32 // Mass
 
-	Index int // Grid Index
+	Index int // Index
 	T     int // Type
 }
 

@@ -7,7 +7,7 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-func initParticles(H, cols, rows float32) []*particle.Particle {
+func initParticles(H, cols, rows float32) ([]*particle.Particle, int) {
 	var particles []*particle.Particle
 
 	// Initial particle configuration
@@ -55,7 +55,7 @@ func initParticles(H, cols, rows float32) []*particle.Particle {
 		}
 	}
 
-	return particles
+	return particles, len(particles) - 1
 }
 
 func (s *Simulation) SpawnParticles() {
@@ -74,11 +74,12 @@ func (s *Simulation) SpawnParticles() {
 				newParticle := particle.New(
 					x, y,
 
-					len(s.particles),
+					s.LatestIndex+1,
 
 					particle.Fluid,
 				)
 
+				s.LatestIndex++
 				s.particles = append(s.particles, newParticle)
 			}
 		}

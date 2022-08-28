@@ -29,6 +29,8 @@ type Simulation struct {
 	SpikyGradF float32
 	ViscLapF   float32
 
+	LatestIndex int // Latest particle index
+
 	Eps          float32 // Boundary epsilon
 	BoundDamping float32 // Boundary damping
 
@@ -40,7 +42,7 @@ type Simulation struct {
 }
 
 func New(H, cols, rows, width, height float32) *Simulation {
-	particles := initParticles(H, cols, rows)
+	particles, latestIndex := initParticles(H, cols, rows)
 
 	Hf64 := float64(H)
 
@@ -64,6 +66,8 @@ func New(H, cols, rows, width, height float32) *Simulation {
 		Poly6F:     4 / float32(math.Pi*math.Pow(Hf64, 8)),
 		SpikyGradF: -30 / float32(math.Pi*math.Pow(Hf64, 5)),
 		ViscLapF:   40 / float32(math.Pi*math.Pow(Hf64, 5)),
+
+		LatestIndex: latestIndex,
 
 		Eps:          H,
 		BoundDamping: -0.5,

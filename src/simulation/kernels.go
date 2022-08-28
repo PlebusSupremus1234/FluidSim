@@ -2,9 +2,9 @@ package simulation
 
 import "math"
 
-func (s *Simulation) Poly6(r2 float32) float32 {
-	if 0 <= r2 && r2 <= s.H*s.H {
-		return s.Poly6F * float32(math.Pow(float64(s.H*s.H-r2), 3))
+func (s *Simulation) Poly6(rSq float32) float32 {
+	if 0 <= rSq && rSq <= s.H*s.H {
+		return s.Poly6F * float32(math.Pow(float64(s.H*s.H-rSq), 3))
 	} else {
 		return 0
 	}

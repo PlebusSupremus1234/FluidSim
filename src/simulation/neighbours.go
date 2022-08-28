@@ -14,24 +14,24 @@ type Neighbours struct {
 func (s *Simulation) UpdateNeighbours() {
 	neighbours := make(map[int]Neighbours)
 
-	for i, Pi := range s.particles {
+	for _, i := range s.particles {
 		var fluid []*particle.Particle
 		var bound []*particle.Particle
 
-		for _, Pj := range s.FindGridNeighbours(Pi) {
-			rij := rl.Vector2Subtract(Pi.X, Pj.X)
+		for _, j := range s.FindGridNeighbours(i) {
+			rij := rl.Vector2Subtract(i.X, j.X)
 			mag := rl.Vector2Length(rij)
 
-			if mag <= s.H {
-				if Pj.T == particle.Fluid {
-					fluid = append(fluid, Pj)
+			if mag < s.H {
+				if j.T == particle.Fluid {
+					fluid = append(fluid, j)
 				} else {
-					bound = append(bound, Pj)
+					bound = append(bound, j)
 				}
 			}
 		}
 
-		neighbours[i] = Neighbours{
+		neighbours[i.Index] = Neighbours{
 			Fluid: fluid,
 			Bound: bound,
 		}
