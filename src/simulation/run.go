@@ -11,15 +11,18 @@ func (s *Simulation) Run() {
 	// Find neighbours
 	s.UpdateNeighbours()
 
-	// Compute density and pressure
+	// Reconstruct density and pressure
 	s.computeDensityPressure()
 
-	// Compute forces
-	s.computeForces()
+	// Compute non-pressure forces
+	s.computeNonPressForces()
+
+	// Compute pressure forces
+	s.computePressForces()
 
 	// Integration
 	s.integrate()
 
-	// Render particles
-	renderer.Draw(s.particles)
+	// Render scene
+	renderer.Draw(s.particles, s.boundaries)
 }

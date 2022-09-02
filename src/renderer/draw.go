@@ -2,23 +2,23 @@ package renderer
 
 import (
 	"fmt"
+	"github.com/PlebusSupremus1234/FluidSim/src/boundary"
 	"github.com/PlebusSupremus1234/FluidSim/src/particle"
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"math"
 )
 
-func Draw(particles []*particle.Particle) {
+func Draw(particles []*particle.Particle, boundaries []*boundary.Line) {
 	// Draw particles
 	for _, p := range particles {
 		x := int32(math.Round(float64(p.X.X)))
 		y := int32(math.Round(float64(p.X.Y)))
 
-		color := rl.Blue
-		if p.T == particle.Bound {
-			color = rl.Gray
-		}
+		rl.DrawRectangle(x-4, y-4, 8, 8, rl.Blue)
+	}
 
-		rl.DrawRectangle(x-4, y-4, 8, 8, color)
+	for _, b := range boundaries {
+		b.Draw()
 	}
 
 	// Stats

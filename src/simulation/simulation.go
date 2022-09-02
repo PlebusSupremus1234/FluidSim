@@ -1,6 +1,7 @@
 package simulation
 
 import (
+	"github.com/PlebusSupremus1234/FluidSim/src/boundary"
 	"math"
 
 	"github.com/PlebusSupremus1234/FluidSim/src/particle"
@@ -8,9 +9,11 @@ import (
 )
 
 type Simulation struct {
-	particles  []*particle.Particle     // Simulation particles
-	neighbours map[int]Neighbours       // Neighbours for each particle
-	grid       [][][]*particle.Particle // Grid for faster neighbour lookup
+	particles  []*particle.Particle         // Simulation particles
+	neighbours map[int][]*particle.Particle // Neighbours for each particle
+	grid       [][][]*particle.Particle     // Grid for faster neighbour lookup
+
+	boundaries []*boundary.Line
 
 	H float32 // Radius
 
@@ -22,7 +25,7 @@ type Simulation struct {
 	Cohe float32 // Cohesion coefficient
 
 	Gravity rl.Vector2 // Gravity
-	DT      float32    // Integration timestep
+	Dt      float32    // Timestep
 
 	// Kernel factors
 	Poly6F     float32
@@ -30,9 +33,6 @@ type Simulation struct {
 	ViscLapF   float32
 
 	LatestIndex int // Latest particle index
-
-	Eps          float32 // Boundary epsilon
-	BoundDamping float32 // Boundary damping
 
 	ViewWidth  float32 // View width
 	ViewHeight float32 // View height
@@ -42,14 +42,14 @@ type Simulation struct {
 }
 
 func New(H, cols, rows, width, height float32) *Simulation {
-	particles, latestIndex := initParticles(H, cols, rows)
-
 	Hf64 := float64(H)
 
 	return &Simulation{
-		particles:  particles,
-		neighbours: make(map[int]Neighbours),
+		particles:  []*particle.Particle{},
+		neighbours: make(map[int][]*particle.Particle),
 		grid:       [][][]*particle.Particle{},
+
+		boundaries: initBoundaries(width, height, H),
 
 		H: H,
 
@@ -61,16 +61,13 @@ func New(H, cols, rows, width, height float32) *Simulation {
 		Cohe: 0.5,
 
 		Gravity: rl.NewVector2(0, 9.81),
-		DT:      0.0007,
+		Dt:      0.0007,
 
 		Poly6F:     4 / float32(math.Pi*math.Pow(Hf64, 8)),
 		SpikyGradF: -30 / float32(math.Pi*math.Pow(Hf64, 5)),
 		ViscLapF:   40 / float32(math.Pi*math.Pow(Hf64, 5)),
 
-		LatestIndex: latestIndex,
-
-		Eps:          H,
-		BoundDamping: -0.5,
+		LatestIndex: -1,
 
 		ViewWidth:  width,
 		ViewHeight: height,
