@@ -19,19 +19,6 @@ func Sdf(x rl.Vector2, bounds []*Line) (rl.Vector2, float32) {
 			inBoundary = true
 		}
 
-		// Loop through side of the rectangle
-		//for j := 0; j < len(i.vertices); j++ {
-		//	a := i.vertices[j]
-		//	b := i.vertices[(j+1)%len(i.vertices)]
-		//	c := closestPoint(x, a, b)
-		//	d := rl.Vector2Subtract(x, c)
-		//
-		//	if rl.Vector2LenSqr(d) < dist {
-		//		dist = rl.Vector2LenSqr(d)
-		//		closest = c
-		//	}
-		//}
-
 		a := i.A
 		b := i.B
 		c := closestPoint(x, a, b)

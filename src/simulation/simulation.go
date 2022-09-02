@@ -13,7 +13,8 @@ type Simulation struct {
 	neighbours map[int][]*particle.Particle // Neighbours for each particle
 	grid       [][][]*particle.Particle     // Grid for faster neighbour lookup
 
-	boundaries []*boundary.Line
+	boundaries []*boundary.Line     // Boundaries
+	volumeMap  map[int]*VolMapEntry // Volume map
 
 	H float32 // Radius
 
@@ -50,6 +51,7 @@ func New(H, cols, rows, width, height float32) *Simulation {
 		grid:       [][][]*particle.Particle{},
 
 		boundaries: initBoundaries(width, height, H),
+		volumeMap:  make(map[int]*VolMapEntry),
 
 		H: H,
 

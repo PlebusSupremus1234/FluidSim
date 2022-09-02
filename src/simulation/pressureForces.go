@@ -12,21 +12,22 @@ func (s *Simulation) computePressForces() {
 
 			normalized := rl.Vector2Normalize(rij)
 
-			WGrad := s.SpikyGrad(mag)
+			Wgrad := s.SpikyGrad(mag)
 
 			// Compute pressure force
-			multiplier := (i.P/(i.Rho*i.Rho) + j.P/(j.Rho*j.Rho)) * WGrad
+			multiplier := (i.P/(i.Rho*i.Rho) + j.P/(j.Rho*j.Rho)) * Wgrad
 			FpressF = rl.Vector2Add(FpressF, rl.Vector2Scale(normalized, multiplier))
 		}
 
-		volume, closest := s.computeBoundaryVolume(i)
+		volume := s.volumeMap[i.Index]
+		diff := rl.Vector2Subtract(i.X, volume.Closest)
 
-		WGrad := s.SpikyGrad(rl.Vector2Length(rl.Vector2Subtract(i.X, closest)))
-		multiplier := (i.P/(i.Rho*i.Rho) + i.P/(s.RestDens*s.RestDens)) * WGrad
-		FpressB := rl.Vector2Scale(rl.Vector2Normalize(rl.Vector2Subtract(i.X, closest)), multiplier)
+		Wgrad := s.SpikyGrad(rl.Vector2Length(diff))
+		multiplier := (i.P/(i.Rho*i.Rho) + i.P/(s.RestDens*s.RestDens)) * Wgrad
+		FpressB := rl.Vector2Scale(rl.Vector2Normalize(diff), multiplier)
 
 		FpressF = rl.Vector2Scale(FpressF, -i.M*i.M)
-		FpressB = rl.Vector2Scale(FpressB, -i.M*i.M*volume)
+		FpressB = rl.Vector2Scale(FpressB, -i.M*i.M*volume.Vol)
 
 		Fpress := rl.Vector2Add(FpressF, FpressB)
 		i.A = rl.Vector2Add(i.A, Fpress)

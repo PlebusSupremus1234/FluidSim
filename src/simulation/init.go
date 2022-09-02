@@ -30,26 +30,26 @@ func initBoundaries(width, height, H float32) []*boundary.Line {
 	var boundaries []*boundary.Line
 
 	boundaries = append(boundaries, boundary.New(
-		rl.Vector2{},
-		rl.Vector2{Y: height},
+		rl.Vector2{X: H / 2},
+		rl.Vector2{X: H / 2, Y: height - H},
 		H,
 	))
 
 	boundaries = append(boundaries, boundary.New(
-		rl.Vector2{Y: height},
-		rl.Vector2{X: width, Y: height},
+		rl.Vector2{Y: height - H/2},
+		rl.Vector2{X: width - H, Y: height - H/2},
 		H,
 	))
 
 	boundaries = append(boundaries, boundary.New(
-		rl.Vector2{X: width, Y: height},
-		rl.Vector2{X: width},
+		rl.Vector2{X: width - H/2, Y: height},
+		rl.Vector2{X: width - H/2, Y: H},
 		H,
 	))
 
 	boundaries = append(boundaries, boundary.New(
-		rl.Vector2{X: width},
-		rl.Vector2{},
+		rl.Vector2{X: width, Y: H / 2},
+		rl.Vector2{X: H, Y: H / 2},
 		H,
 	))
 

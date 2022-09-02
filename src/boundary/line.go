@@ -6,8 +6,9 @@ import (
 )
 
 type Line struct {
-	A        rl.Vector2
-	B        rl.Vector2
+	A rl.Vector2
+	B rl.Vector2
+
 	vertices []rl.Vector2
 }
 
@@ -29,6 +30,7 @@ func New(a, b rl.Vector2, w float32) *Line {
 	return &Line{
 		A: a,
 		B: b,
+
 		vertices: []rl.Vector2{
 			rotatedA,
 			rotatedB,
@@ -56,8 +58,6 @@ func (l *Line) Draw() {
 }
 
 func (l *Line) Contains(x rl.Vector2) bool {
-	// Rectangle but defined by two points
-
 	collision := false
 	next := 0
 

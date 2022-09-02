@@ -17,10 +17,10 @@ func (s *Simulation) computeNonPressForces() {
 			vji := rl.Vector2Subtract(j.V, i.V)
 
 			W := s.Poly6(mag)
-			WLap := s.ViscLap(mag)
+			Wlap := s.ViscLap(mag)
 
 			// Compute viscosity force
-			multiplierV := j.M / j.Rho * WLap
+			multiplierV := j.M / j.Rho * Wlap
 			Fvisc = rl.Vector2Add(Fvisc, rl.Vector2Scale(vji, multiplierV))
 
 			// Compute surface tension force

@@ -17,12 +17,16 @@ func (s *Simulation) computeDensityPressure() {
 		density += s.Poly6(0) // Self
 		density *= i.M
 
-		volume, closest := s.computeBoundaryVolume(i)
-		density += i.M * volume * s.Poly6(rl.Vector2LenSqr(rl.Vector2Subtract(i.X, closest)))
-		//density += s.RestDens * volume * s.Poly6(rl.Vector2LenSqr(rl.Vector2Subtract(i.X, closest)))
+		volume := s.computeBoundaryVolume(i)
+
+		distSq := rl.Vector2LenSqr(rl.Vector2Subtract(i.X, volume.Closest))
+		density += i.M * volume.Vol * s.Poly6(distSq)
 
 		i.Rho = density
 		i.P = s.Stiffness * (density/s.RestDens - 1)
 		i.A = rl.Vector2Zero()
+
+		// Store volume for later use
+		s.volumeMap[i.Index] = volume
 	}
 }

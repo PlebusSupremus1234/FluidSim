@@ -6,7 +6,13 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-func (s *Simulation) computeBoundaryVolume(i *particle.Particle) (float32, rl.Vector2) {
+// VolMapEntry entry for faster volume map values queries
+type VolMapEntry struct {
+	Vol     float32
+	Closest rl.Vector2
+}
+
+func (s *Simulation) computeBoundaryVolume(i *particle.Particle) *VolMapEntry {
 	var volume float32 = 0
 
 	for _, j := range s.neighbours[i.Index] {
@@ -19,5 +25,8 @@ func (s *Simulation) computeBoundaryVolume(i *particle.Particle) (float32, rl.Ve
 
 	closest, signedDist := boundary.Sdf(i.X, s.boundaries)
 
-	return volume + signedDist, closest
+	return &VolMapEntry{
+		Vol:     volume + signedDist,
+		Closest: closest,
+	}
 }
