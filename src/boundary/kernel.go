@@ -1,9 +1,6 @@
 package boundary
 
-import "math"
-
-func cubicSpline(r, h float32) float32 {
-	f := 40 / (7 * math.Pi * h * h)
+func cubicSpline(r, h, f float32) float32 {
 	q := r / h
 
 	if 0 <= q && q <= 0.5 {

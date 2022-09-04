@@ -5,37 +5,37 @@ import (
 	"math"
 )
 
-// Sdf is the signed distance function
-func Sdf(x rl.Vector2, bounds []*Line) (rl.Vector2, float32) {
+// SignedDistance function
+func SignedDistance(x rl.Vector2, bounds []*Boundary) (rl.Vector2, float32) {
 	// Find the closest point on the rectangle to the particle using vector projection
 	dist := float32(math.Inf(1))
 	closest := rl.Vector2Zero()
 
 	inBoundary := false
 
-	// Loop through all boundary lines
+	// Loop through all boundaries
 	for _, i := range bounds {
 		if i.Contains(x) {
 			inBoundary = true
 		}
 
-		a := i.A
-		b := i.B
-		c := closestPoint(x, a, b)
-		d := rl.Vector2Subtract(x, c)
+		// Loop through sides of the boundary
+		for j := 0; j < len(i.vertices); j++ {
+			c := closestPoint(x, i.vertices[j], i.vertices[(j+1)%len(i.vertices)])
 
-		if rl.Vector2LenSqr(d) < dist {
-			dist = rl.Vector2LenSqr(d)
-			closest = c
+			d := rl.Vector2Distance(x, c)
+
+			if d < dist {
+				dist = d
+				closest = c
+			}
 		}
 	}
 
-	infimum := float32(math.Sqrt(float64(dist)))
-
 	if inBoundary {
-		return closest, -infimum
+		return closest, -dist
 	} else {
-		return closest, infimum
+		return closest, dist
 	}
 }
 

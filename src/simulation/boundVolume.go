@@ -16,17 +16,21 @@ func (s *Simulation) computeBoundaryVolume(i *particle.Particle) *VolMapEntry {
 	var volume float32 = 0
 
 	for _, j := range s.neighbours[i.Index] {
-		_, signedDist := boundary.Sdf(j.X, s.boundaries)
+		_, signedDist := boundary.SignedDistance(j.X, s.boundaries)
 
-		extended := boundary.ExtensionFunc(signedDist, s.H)
+		extended := boundary.ExtensionFunc(signedDist, s.H, s.CubicSplineF)
 
 		volume += extended
 	}
 
-	closest, signedDist := boundary.Sdf(i.X, s.boundaries)
+	closest, signedDist := boundary.SignedDistance(i.X, s.boundaries)
+
+	self := boundary.ExtensionFunc(signedDist, s.H, s.CubicSplineF)
+
+	volume += self
 
 	return &VolMapEntry{
-		Vol:     volume + signedDist,
+		Vol:     volume,
 		Closest: closest,
 	}
 }

@@ -2,10 +2,9 @@ package simulation
 
 import (
 	"github.com/PlebusSupremus1234/FluidSim/src/boundary"
-	"math/rand"
-
 	"github.com/PlebusSupremus1234/FluidSim/src/particle"
 	rl "github.com/gen2brain/raylib-go/raylib"
+	"math/rand"
 )
 
 //func initParticles(H, cols, rows float32) ([]*particle.Particle, int) {
@@ -26,8 +25,8 @@ import (
 //	return particles, len(particles) - 1
 //}
 
-func initBoundaries(width, height, H float32) []*boundary.Line {
-	var boundaries []*boundary.Line
+func initBoundaries(width, height, H float32) []*boundary.Boundary {
+	var boundaries []*boundary.Boundary
 
 	boundaries = append(boundaries, boundary.New(
 		rl.Vector2{X: H / 2},
@@ -88,4 +87,20 @@ func (s *Simulation) SpawnParticles() {
 			}
 		}
 	}
+	//
+	//mousePos := rl.GetMousePosition()
+	//mX, mY := mousePos.X, mousePos.Y
+	//
+	//x := mX
+	//y := mY
+	//
+	//badX := (x+s.H > s.ViewWidth) || (x-s.H < 0)
+	//badY := (y+s.H > s.ViewHeight) || (y-s.H < 0)
+	//
+	//if !badX && !badY {
+	//	newParticle := particle.New(x, y, s.LatestIndex+1)
+	//
+	//	s.LatestIndex++
+	//	s.particles = append(s.particles, newParticle)
+	//}
 }

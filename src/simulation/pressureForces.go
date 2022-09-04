@@ -1,6 +1,8 @@
 package simulation
 
-import rl "github.com/gen2brain/raylib-go/raylib"
+import (
+	rl "github.com/gen2brain/raylib-go/raylib"
+)
 
 func (s *Simulation) computePressForces() {
 	for _, i := range s.particles {
@@ -20,16 +22,18 @@ func (s *Simulation) computePressForces() {
 		}
 
 		volume := s.volumeMap[i.Index]
+
 		diff := rl.Vector2Subtract(i.X, volume.Closest)
 
 		Wgrad := s.SpikyGrad(rl.Vector2Length(diff))
-		multiplier := (i.P/(i.Rho*i.Rho) + i.P/(s.RestDens*s.RestDens)) * Wgrad
+		multiplier := -i.M * i.M * volume.Vol * (i.P/(i.Rho*i.Rho) + i.P/(s.RestDens*s.RestDens)) * Wgrad
 		FpressB := rl.Vector2Scale(rl.Vector2Normalize(diff), multiplier)
 
-		FpressF = rl.Vector2Scale(FpressF, -i.M*i.M)
-		FpressB = rl.Vector2Scale(FpressB, -i.M*i.M*volume.Vol)
+		//fmt.Printf("%.2f  {%.2f %.2f}  {%.2f %.2f}\n", volume.Vol, FpressB.X, FpressB.Y, i.V.X, i.V.Y)
 
+		FpressF = rl.Vector2Scale(FpressF, -i.M*i.M)
 		Fpress := rl.Vector2Add(FpressF, FpressB)
+
 		i.A = rl.Vector2Add(i.A, Fpress)
 	}
 }

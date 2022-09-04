@@ -13,7 +13,7 @@ type Simulation struct {
 	neighbours map[int][]*particle.Particle // Neighbours for each particle
 	grid       [][][]*particle.Particle     // Grid for faster neighbour lookup
 
-	boundaries []*boundary.Line     // Boundaries
+	boundaries []*boundary.Boundary // Boundaries
 	volumeMap  map[int]*VolMapEntry // Volume map
 
 	H float32 // Radius
@@ -29,9 +29,10 @@ type Simulation struct {
 	Dt      float32    // Timestep
 
 	// Kernel factors
-	Poly6F     float32
-	SpikyGradF float32
-	ViscLapF   float32
+	Poly6F       float32
+	SpikyGradF   float32
+	ViscLapF     float32
+	CubicSplineF float32
 
 	LatestIndex int // Latest particle index
 
@@ -65,9 +66,10 @@ func New(H, cols, rows, width, height float32) *Simulation {
 		Gravity: rl.NewVector2(0, 9.81),
 		Dt:      0.0007,
 
-		Poly6F:     4 / float32(math.Pi*math.Pow(Hf64, 8)),
-		SpikyGradF: -30 / float32(math.Pi*math.Pow(Hf64, 5)),
-		ViscLapF:   40 / float32(math.Pi*math.Pow(Hf64, 5)),
+		Poly6F:       4 / float32(math.Pi*math.Pow(Hf64, 8)),
+		SpikyGradF:   -30 / float32(math.Pi*math.Pow(Hf64, 5)),
+		ViscLapF:     40 / float32(math.Pi*math.Pow(Hf64, 5)),
+		CubicSplineF: 40 / (7 * math.Pi * H * H),
 
 		LatestIndex: -1,
 
