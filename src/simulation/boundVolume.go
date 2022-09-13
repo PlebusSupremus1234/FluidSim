@@ -13,24 +13,24 @@ type VolMapEntry struct {
 }
 
 func (s *Simulation) computeBoundaryVolume(i *particle.Particle) *VolMapEntry {
-	var volume float32 = 0
+	var boundVol float32 = 0
 
-	for _, j := range s.neighbours[i.Index] {
+	for _, j := range s.findNeighbours(i) {
 		_, signedDist := boundary.SignedDistance(j.X, s.boundaries)
 
-		extended := boundary.ExtensionFunc(signedDist, s.H, s.CubicSplineF)
-
-		volume += extended
+		extended := boundary.Extend(signedDist, s.h, s.cubicSplineF)
+		boundVol += extended
+		//boundVol += j.M / j.Rho * extended
 	}
 
 	closest, signedDist := boundary.SignedDistance(i.X, s.boundaries)
 
-	self := boundary.ExtensionFunc(signedDist, s.H, s.CubicSplineF)
-
-	volume += self
+	self := boundary.Extend(signedDist, s.h, s.cubicSplineF)
+	boundVol += self
+	//boundVol += i.M / i.Rho * self
 
 	return &VolMapEntry{
-		Vol:     volume,
+		Vol:     boundVol,
 		Closest: closest,
 	}
 }

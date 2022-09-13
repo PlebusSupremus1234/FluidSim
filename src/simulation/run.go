@@ -1,17 +1,10 @@
 package simulation
 
-import (
-	"github.com/PlebusSupremus1234/FluidSim/src/renderer"
-)
-
 func (s *Simulation) Run() {
 	// Update grid for neighbour search
-	s.UpdateGrid()
+	s.updateGrid()
 
-	// Find neighbours
-	s.UpdateNeighbours()
-
-	// Reconstruct density and pressure
+	// Compute density and pressure
 	s.computeDensityPressure()
 
 	// Compute non-pressure forces
@@ -24,5 +17,5 @@ func (s *Simulation) Run() {
 	s.integrate()
 
 	// Render scene
-	renderer.Draw(s.particles, s.boundaries)
+	s.Draw(s.particles, s.boundaries)
 }

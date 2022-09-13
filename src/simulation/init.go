@@ -7,24 +7,6 @@ import (
 	"math/rand"
 )
 
-//func initParticles(H, cols, rows float32) ([]*particle.Particle, int) {
-//	var particles []*particle.Particle
-//
-//	// Initial particle configuration
-//	for i := 0; i < 30; i++ {
-//		for j := 0; j < 20; j++ {
-//			particles = append(particles, particle.New(
-//				100+H*float32(j)+rand.Float32(),
-//				200+H*float32(i)+rand.Float32(),
-//
-//				len(particles), // Index
-//			))
-//		}
-//	}
-//
-//	return particles, len(particles) - 1
-//}
-
 func initBoundaries(width, height, H float32) []*boundary.Boundary {
 	var boundaries []*boundary.Boundary
 
@@ -73,34 +55,34 @@ func (s *Simulation) SpawnParticles() {
 			mousePos := rl.GetMousePosition()
 			mX, mY := mousePos.X, mousePos.Y
 
-			x := mX + float32(j)*s.H + rand.Float32()
-			y := mY + float32(i)*s.H + rand.Float32()
+			x := mX + float32(j)*s.h + rand.Float32()
+			y := mY + float32(i)*s.h + rand.Float32()
 
-			badX := (x+s.H > s.ViewWidth) || (x-s.H < 0)
-			badY := (y+s.H > s.ViewHeight) || (y-s.H < 0)
+			badX := (x+s.h > s.viewW) || (x-s.h < 0)
+			badY := (y+s.h > s.viewH) || (y-s.h < 0)
 
 			if !badX && !badY {
-				newParticle := particle.New(x, y, s.LatestIndex+1)
+				newParticle := particle.New(x, y, s.index+1)
 
-				s.LatestIndex++
+				s.index++
 				s.particles = append(s.particles, newParticle)
 			}
 		}
 	}
-	//
+
 	//mousePos := rl.GetMousePosition()
 	//mX, mY := mousePos.X, mousePos.Y
 	//
 	//x := mX
 	//y := mY
 	//
-	//badX := (x+s.H > s.ViewWidth) || (x-s.H < 0)
-	//badY := (y+s.H > s.ViewHeight) || (y-s.H < 0)
+	//badX := (x+s.h > s.viewW) || (x-s.h < 0)
+	//badY := (y+s.h > s.viewH) || (y-s.h < 0)
 	//
 	//if !badX && !badY {
-	//	newParticle := particle.New(x, y, s.LatestIndex+1)
+	//	newParticle := particle.New(x, y, s.index+1)
 	//
-	//	s.LatestIndex++
+	//	s.index++
 	//	s.particles = append(s.particles, newParticle)
 	//}
 }

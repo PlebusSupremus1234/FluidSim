@@ -19,11 +19,13 @@ func New(a, b rl.Vector2, w float32) *Boundary {
 	c := math.Atan2(float64(b.Y-a.Y), float64(b.X-a.X)) + math.Pi/2 // Angle between the two points
 	d := c - math.Pi/2                                              // Rotation angle for each vertex
 
+	// Calculate the vertices
 	cornerA := rl.NewVector2(a.X, a.Y-w/2)
 	cornerB := rl.NewVector2(a.X, a.Y+w/2)
 	cornerC := rl.NewVector2(b.X, b.Y+w/2)
 	cornerD := rl.NewVector2(b.X, b.Y-w/2)
 
+	// Rotate the vertices
 	rotatedA := rotatePoint(cornerA, a, d)
 	rotatedB := rotatePoint(cornerB, a, d)
 	rotatedC := rotatePoint(cornerC, b, d)
@@ -62,6 +64,7 @@ func (l *Boundary) Draw() {
 }
 
 func (l *Boundary) Contains(x rl.Vector2) bool {
+	// Check if the point is inside the rectangle
 	collision := false
 	next := 0
 

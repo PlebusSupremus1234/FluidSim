@@ -5,7 +5,6 @@ import (
 	"math"
 )
 
-// SignedDistance function
 func SignedDistance(x rl.Vector2, bounds []*Boundary) (rl.Vector2, float32) {
 	// Find the closest point on the rectangle to the particle using vector projection
 	dist := float32(math.Inf(1))
@@ -39,8 +38,8 @@ func SignedDistance(x rl.Vector2, bounds []*Boundary) (rl.Vector2, float32) {
 	}
 }
 
-// closestPoint is a function to find the closest point on a line to a point
 func closestPoint(p, a, b rl.Vector2) rl.Vector2 {
+	// Find the closest point on the line segment to the particle
 	w := rl.Vector2Subtract(a, b)
 	v := rl.Vector2Subtract(p, b)
 	c := rl.Vector2DotProduct(w, v)

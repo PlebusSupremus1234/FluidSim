@@ -1,23 +1,14 @@
-package renderer
+package simulation
 
 import (
 	"fmt"
 	"github.com/PlebusSupremus1234/FluidSim/src/boundary"
 	"github.com/PlebusSupremus1234/FluidSim/src/particle"
 	rl "github.com/gen2brain/raylib-go/raylib"
-	"math"
 )
 
-func Draw(particles []*particle.Particle, boundaries []*boundary.Boundary) {
-	// Draw particles
-	for _, p := range particles {
-		x := int32(math.Round(float64(p.X.X)))
-		y := int32(math.Round(float64(p.X.Y)))
-
-		rl.DrawRectangle(x-4, y-4, 8, 8, rl.Blue)
-		//rl.DrawCircleV(p.X, 16, rl.Blue)
-	}
-
+func (s *Simulation) Draw(particles []*particle.Particle, boundaries []*boundary.Boundary) {
+	// Draw boundaries
 	for _, b := range boundaries {
 		b.Draw()
 	}
