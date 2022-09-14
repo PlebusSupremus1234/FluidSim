@@ -6,12 +6,12 @@ import (
 )
 
 func main() {
-	var H float32 = 16                     // Particle width
+	var h float32 = 16                     // Particle width
 	var cols, rows float32 = 106, 50       // Grid size
-	var width, height = cols * H, rows * H // Simulation size
+	var width, height = cols * h, rows * h // Simulation size
 
 	simulation := sim.New(
-		H,
+		h,
 		cols, rows,
 		width, height,
 	)

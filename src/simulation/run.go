@@ -13,9 +13,33 @@ func (s *Simulation) Run() {
 	// Compute pressure forces
 	s.computePressForces()
 
-	// Integration
-	s.integrate()
+	// Draw scene
+	s.drawScene(s.particles)
 
-	// Render scene
-	s.Draw(s.particles, s.boundaries)
+	// Integrate and draw the particles
+	for _, p := range s.particles {
+		p.Integrate(s.dt)
+
+		if p.X.X < s.h {
+			p.V.X *= -0.5
+			p.X.X = s.h
+		}
+
+		if p.X.X > s.viewW-s.h {
+			p.V.X *= -0.5
+			p.X.X = s.viewW - s.h
+		}
+
+		if p.X.Y < s.h {
+			p.V.Y *= -0.5
+			p.X.Y = s.h
+		}
+
+		if p.X.Y > s.viewH-s.h {
+			p.V.Y *= -0.5
+			p.X.Y = s.viewH - s.h
+		}
+
+		p.Draw()
+	}
 }

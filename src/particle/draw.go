@@ -6,6 +6,7 @@ import (
 )
 
 func (p *Particle) Draw() {
+	// Draw the particle
 	x := int32(math.Round(float64(p.X.X)))
 	y := int32(math.Round(float64(p.X.Y)))
 

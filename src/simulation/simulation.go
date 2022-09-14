@@ -1,7 +1,6 @@
 package simulation
 
 import (
-	"github.com/PlebusSupremus1234/FluidSim/src/boundary"
 	"math"
 
 	"github.com/PlebusSupremus1234/FluidSim/src/particle"
@@ -11,9 +10,6 @@ import (
 type Simulation struct {
 	particles []*particle.Particle     // Simulation particles
 	grid      [][][]*particle.Particle // Grid for faster neighbour lookup
-
-	boundaries []*boundary.Boundary // Boundaries
-	volumeMap  map[int]*VolMapEntry // Volume map
 
 	h float32 // Radius
 
@@ -41,17 +37,14 @@ type Simulation struct {
 	rows float32
 }
 
-func New(H, cols, rows, width, height float32) *Simulation {
-	Hf64 := float64(H)
+func New(h, cols, rows, width, height float32) *Simulation {
+	hf64 := float64(h)
 
 	return &Simulation{
 		particles: []*particle.Particle{},
 		grid:      [][][]*particle.Particle{},
 
-		boundaries: initBoundaries(width, height, H),
-		volumeMap:  make(map[int]*VolMapEntry),
-
-		h: H,
+		h: h,
 
 		rho0:      1000,
 		stiffness: -7000,
@@ -61,10 +54,10 @@ func New(H, cols, rows, width, height float32) *Simulation {
 		gravity: rl.NewVector2(0, 9.81),
 		dt:      0.0007,
 
-		poly6F:       4 / float32(math.Pi*math.Pow(Hf64, 8)),
-		spikyGradF:   -30 / float32(math.Pi*math.Pow(Hf64, 5)),
-		viscLapF:     40 / float32(math.Pi*math.Pow(Hf64, 5)),
-		cubicSplineF: 40 / (7 * math.Pi * H * H),
+		poly6F:       4 / float32(math.Pi*math.Pow(hf64, 8)),
+		spikyGradF:   -30 / float32(math.Pi*math.Pow(hf64, 5)),
+		viscLapF:     40 / float32(math.Pi*math.Pow(hf64, 5)),
+		cubicSplineF: 40 / (7 * math.Pi * h * h),
 
 		index: -1,
 
