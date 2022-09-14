@@ -1,125 +1,76 @@
 package simulation
 
 import (
-	"github.com/PlebusSupremus1234/FluidSim/src/particle"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 func (s *Simulation) computeDensityPressure() {
+	// Compute the particle's density and pressure
 	for _, i := range s.particles {
-		var densityF float32 = 0
-		var densityB float32 = 0
+		var density float32 = 0
 
-		neighbours := s.neighbours[i.Index]
-
-		for _, j := range neighbours.Fluid {
+		for _, j := range s.findNeighbours(i) {
 			rij := rl.Vector2Subtract(i.X, j.X)
 			magSq := rl.Vector2LenSqr(rij)
+			W := s.poly6(magSq)
 
-			Wij := s.Poly6(magSq)
-			densityF += Wij
+			density += j.M * W
 		}
 
-		densityF += s.Poly6(0) // Self
+		density += i.M * s.poly6(0) // Self
 
-		for _, k := range neighbours.Bound {
-			rik := rl.Vector2Subtract(i.X, k.X)
-			magSq := rl.Vector2LenSqr(rik)
-
-			Wik := s.Poly6(magSq)
-			densityB += Wik
-		}
-
-		density := i.M*densityF + i.M*densityB
-
-		i.Rho = density
-		i.P = s.Stiffness * (density/s.RestDens - 1)
+		i.Rho = density                        // Density
+		i.P = s.stiffness * (i.Rho/s.rho0 - 1) // Pressure
+		i.A = rl.Vector2Zero()                 // Reset acceleration
 	}
 }
 
-func (s *Simulation) computeForces() {
+func (s *Simulation) computeNonPressForces() {
+	// Compute non-pressure forces
 	for _, i := range s.particles {
-		FpressF := rl.Vector2Zero()
-		FpressB := rl.Vector2Zero()
+		viscForce := rl.Vector2Zero()
 
-		Fvisc := rl.Vector2Zero()
-		Fsurf := rl.Vector2Zero()
+		for _, j := range s.findNeighbours(i) {
+			rij := rl.Vector2Subtract(i.X, j.X)
+			mag := rl.Vector2Length(rij)
 
-		neighbours := s.neighbours[i.Index]
+			vji := rl.Vector2Subtract(j.V, i.V)
 
-		for _, j := range neighbours.Fluid {
+			Wlap := s.viscLap(mag)
+
+			// Compute viscosity force
+			multiplierV := j.M / j.Rho * Wlap
+			viscForce = rl.Vector2Add(viscForce, rl.Vector2Scale(vji, multiplierV))
+		}
+
+		viscForce = rl.Vector2Scale(viscForce, s.nu)
+		Fgravity := rl.Vector2Scale(s.gravity, i.M/i.Rho)
+
+		sum := rl.Vector2Add(viscForce, Fgravity)
+		i.A = rl.Vector2Add(i.A, sum)
+	}
+}
+
+func (s *Simulation) computePressForces() {
+	// Compute pressure forces
+	for _, i := range s.particles {
+		pressureForce := rl.Vector2Zero()
+
+		for _, j := range s.findNeighbours(i) {
 			rij := rl.Vector2Subtract(i.X, j.X)
 			mag := rl.Vector2Length(rij)
 
 			normalized := rl.Vector2Normalize(rij)
-			vji := rl.Vector2Subtract(j.V, i.V)
 
-			Wpoly := s.Poly6(mag)
-			Wspiky := s.SpikyGrad(mag)
-			Wvisc := s.ViscLap(mag)
+			Wgrad := s.spikyGrad(mag)
 
 			// Compute pressure force
-			multiplierP := (i.P/(i.Rho*i.Rho) + j.P/(j.Rho*j.Rho)) * Wspiky
-			FpressF = rl.Vector2Add(FpressF, rl.Vector2Scale(normalized, multiplierP))
-
-			// Compute viscosity force
-			multiplierV := j.M / j.Rho * Wvisc
-			Fvisc = rl.Vector2Add(Fvisc, rl.Vector2Scale(vji, multiplierV))
-
-			// Compute surface tension force
-			K := 2 * s.RestDens / (i.Rho + j.Rho) // Symmetric factor that amplifies the forces at the surface
-			multiplierC := K * -s.Cohe * i.M * j.M * Wpoly
-			Fsurf = rl.Vector2Add(Fsurf, rl.Vector2Scale(normalized, multiplierC))
+			multiplier := (i.P/(i.Rho*i.Rho) + j.P/(j.Rho*j.Rho)) * Wgrad
+			pressureForce = rl.Vector2Add(pressureForce, rl.Vector2Scale(normalized, multiplier))
 		}
 
-		for _, k := range neighbours.Bound {
-			rik := rl.Vector2Subtract(i.X, k.X)
-			mag := rl.Vector2Length(rik)
+		pressureForce = rl.Vector2Scale(pressureForce, -i.M*i.M)
 
-			normalized := rl.Vector2Normalize(rik)
-
-			Wspiky := s.SpikyGrad(mag)
-
-			// Compute pressure force
-			multiplier := (i.P/(i.Rho*i.Rho) + k.P/(k.Rho*k.Rho)) * Wspiky
-			FpressB = rl.Vector2Add(FpressB, rl.Vector2Scale(normalized, multiplier))
-		}
-
-		FpressF = rl.Vector2Scale(FpressF, -i.M*i.M)
-		FpressB = rl.Vector2Scale(FpressB, -i.M*i.M)
-		Fpress := rl.Vector2Add(FpressF, FpressB)
-		// FpressB for the boundary particles is sometimes NaN
-
-		Fvisc = rl.Vector2Scale(Fvisc, s.Visc)
-		Fgravity := rl.Vector2Scale(s.Gravity, i.M/i.Rho)
-
-		sum := rl.Vector2Add(Fpress, rl.Vector2Add(Fvisc, rl.Vector2Add(Fsurf, Fgravity)))
-		i.A = sum
-	}
-}
-
-func (s *Simulation) integrate() {
-	for _, i := range s.particles {
-		if i.T == particle.Fluid {
-			i.V = rl.Vector2Add(i.V, rl.Vector2Scale(i.A, s.DT/i.Rho))
-			i.X = rl.Vector2Add(i.X, rl.Vector2Scale(i.V, s.DT))
-		}
-
-		//if i.X.X-s.Eps < 0 {
-		//	i.V.X *= s.BoundDamping
-		//	i.X.X = s.Eps
-		//}
-		//if i.X.X+s.Eps > s.ViewWidth {
-		//	i.V.X *= s.BoundDamping
-		//	i.X.X = s.ViewWidth - s.Eps
-		//}
-		//if i.X.Y-s.Eps < 0 {
-		//	i.V.Y *= s.BoundDamping
-		//	i.X.Y = s.Eps
-		//}
-		//if i.X.Y+s.Eps > s.ViewHeight {
-		//	i.V.Y *= s.BoundDamping
-		//	i.X.Y = s.ViewHeight - s.Eps
-		//}
+		i.A = rl.Vector2Add(i.A, pressureForce)
 	}
 }

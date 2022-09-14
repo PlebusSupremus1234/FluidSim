@@ -4,11 +4,6 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-const (
-	Fluid = iota
-	Bound
-)
-
 type Particle struct {
 	X rl.Vector2 // Position
 	V rl.Vector2 // Velocity
@@ -19,10 +14,9 @@ type Particle struct {
 	M   float32 // Mass
 
 	Index int // Index
-	T     int // Type
 }
 
-func New(x, y float32, index, T int) *Particle {
+func New(x, y float32, index int) *Particle {
 	return &Particle{
 		X: rl.NewVector2(x, y),
 		V: rl.Vector2Zero(),
@@ -33,6 +27,5 @@ func New(x, y float32, index, T int) *Particle {
 		M:   3,
 
 		Index: index,
-		T:     T,
 	}
 }
