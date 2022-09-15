@@ -27,6 +27,7 @@ func (s *Simulation) computeDensityPressure() {
 
 func (s *Simulation) computeNonPressForces() {
 	// Compute non-pressure forces
+
 	for _, i := range s.particles {
 		viscForce := rl.Vector2Zero()
 
