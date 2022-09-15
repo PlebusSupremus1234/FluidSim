@@ -1,6 +1,7 @@
 package simulation
 
 import (
+	"github.com/PlebusSupremus1234/FluidSim/src/linked_list"
 	"github.com/PlebusSupremus1234/FluidSim/src/particle"
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"math/rand"
@@ -23,6 +24,12 @@ func (s *Simulation) SpawnParticles() {
 
 				s.index++
 				s.particles = append(s.particles, newParticle)
+
+				node := linked_list.NewNode(newParticle)
+				s.nodes[newParticle.Index] = node
+
+				gridX, gridY := s.getGridCoords(newParticle.X)
+				s.grid[gridY][gridX].Add(node)
 			}
 		}
 	}

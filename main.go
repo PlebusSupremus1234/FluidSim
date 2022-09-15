@@ -2,7 +2,6 @@ package main
 
 import (
 	sim "github.com/PlebusSupremus1234/FluidSim/src/simulation"
-	"github.com/PlebusSupremus1234/FluidSim/src/test"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -43,6 +42,4 @@ func main() {
 	}
 
 	rl.CloseWindow()
-
-	test.Test()
 }

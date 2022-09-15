@@ -2,6 +2,8 @@
 
 An interactive particle based SPH fluid simulation written in Go.
 
+TODO DELETE NODE ENTRIES WHEN PARTICLE GOES OUT OF BOUNDS
+
 <br>
 
 ### Credits:

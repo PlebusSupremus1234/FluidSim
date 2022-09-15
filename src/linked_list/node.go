@@ -1,13 +1,16 @@
 package linked_list
 
-type TestValue struct {
-	Value int
-}
+import "github.com/PlebusSupremus1234/FluidSim/src/particle"
 
 type Node struct {
-	Value *TestValue
-	//value *particle.Particle
+	Value *particle.Particle
 
 	Prev *Node
 	Next *Node
+}
+
+func NewNode(p *particle.Particle) *Node {
+	return &Node{
+		Value: p,
+	}
 }

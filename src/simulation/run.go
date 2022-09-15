@@ -1,9 +1,6 @@
 package simulation
 
 func (s *Simulation) Run() {
-	// Update grid for neighbour search
-	s.updateGrid()
-
 	// Compute density and pressure
 	s.computeDensityPressure()
 
@@ -18,6 +15,8 @@ func (s *Simulation) Run() {
 
 	// Integrate and draw the particles
 	for _, p := range s.particles {
+		prev := p.X
+
 		p.Integrate(s.dt)
 
 		if p.X.X < s.h {
@@ -39,6 +38,8 @@ func (s *Simulation) Run() {
 			p.V.Y *= -0.5
 			p.X.Y = s.viewH - s.h
 		}
+
+		s.updateGridParticle(prev, p)
 
 		p.Draw()
 	}
