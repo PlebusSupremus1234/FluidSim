@@ -9,7 +9,10 @@ func (s *Simulation) computeDensityPressure() {
 	for _, i := range s.particles {
 		var density float32 = 0
 
-		for _, j := range s.findNeighbours(i) {
+		neighbours := s.findNeighbours(i)
+		s.neighbours[i.Index] = neighbours
+
+		for _, j := range neighbours {
 			rij := rl.Vector2Subtract(i.X, j.X)
 			magSq := rl.Vector2LenSqr(rij)
 			W := s.poly6(magSq)
@@ -31,7 +34,7 @@ func (s *Simulation) computeNonPressForces() {
 	for _, i := range s.particles {
 		viscForce := rl.Vector2Zero()
 
-		for _, j := range s.findNeighbours(i) {
+		for _, j := range s.neighbours[i.Index] {
 			rij := rl.Vector2Subtract(i.X, j.X)
 			mag := rl.Vector2Length(rij)
 
@@ -57,7 +60,7 @@ func (s *Simulation) computePressForces() {
 	for _, i := range s.particles {
 		pressureForce := rl.Vector2Zero()
 
-		for _, j := range s.findNeighbours(i) {
+		for _, j := range s.neighbours[i.Index] {
 			rij := rl.Vector2Subtract(i.X, j.X)
 			mag := rl.Vector2Length(rij)
 

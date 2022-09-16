@@ -1,7 +1,7 @@
 package simulation
 
 import (
-	"github.com/PlebusSupremus1234/FluidSim/src/linked_list"
+	"github.com/PlebusSupremus1234/FluidSim/src/list"
 	"math"
 
 	"github.com/PlebusSupremus1234/FluidSim/src/particle"
@@ -9,9 +9,10 @@ import (
 )
 
 type Simulation struct {
-	particles []*particle.Particle  // Simulation particles
-	grid      [][]*linked_list.List // Grid for faster neighbour lookup
-	nodes     map[int]*linked_list.Node
+	particles  []*particle.Particle         // Simulation particles
+	neighbours map[int][]*particle.Particle // Particle neighbours
+	grid       [][]*list.List               // Grid for faster neighbour lookup
+	nodes      map[int]*list.Node           // Linked list nodes for each particle
 
 	h float32 // Radius
 
@@ -43,8 +44,9 @@ func New(h, cols, rows, width, height float32) *Simulation {
 	hf64 := float64(h)
 
 	s := &Simulation{
-		particles: []*particle.Particle{},
-		nodes:     make(map[int]*linked_list.Node),
+		particles:  []*particle.Particle{},
+		neighbours: make(map[int][]*particle.Particle),
+		nodes:      make(map[int]*list.Node),
 
 		h: h,
 
@@ -61,7 +63,7 @@ func New(h, cols, rows, width, height float32) *Simulation {
 		viscLapF:     40 / float32(math.Pi*math.Pow(hf64, 5)),
 		cubicSplineF: 40 / (7 * math.Pi * h * h),
 
-		index: -1,
+		index: 0,
 
 		viewW: width,
 		viewH: height,

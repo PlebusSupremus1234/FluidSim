@@ -1,4 +1,4 @@
-package linked_list
+package list
 
 import "github.com/PlebusSupremus1234/FluidSim/src/particle"
 
