@@ -2,6 +2,7 @@ package simulation
 
 import (
 	"github.com/PlebusSupremus1234/FluidSim/src/list"
+	"github.com/PlebusSupremus1234/FluidSim/src/particle"
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"math"
 )
@@ -34,34 +35,43 @@ func (s *Simulation) initGrid() {
 		newGrid = append(newGrid, push)
 	}
 
-	var remove []int
-
 	// Update grid
-	for i, p := range s.particles {
-		x, y := s.getGridCoords(p.X)
+	node := s.particles.Head
 
-		xf32 := float32(x)
-		yf32 := float32(y)
+	for node != nil {
+		// Add particle's node to grid nodes
+		gridNode := list.NewNode(node.Value)
+		s.gridNodes[node.Value.Index] = gridNode
 
-		if xf32 < 0 || xf32 >= s.cols || yf32 < 0 || yf32 >= s.rows {
-			// Flag the particle for deletion if it is outside the grid
-			remove = append(remove, i)
-		} else {
-			// Add particle's node to nodes
-			node := list.NewNode(p)
-			s.nodes[p.Index] = node
+		// Add the particle to the grid
+		x, y := s.getGridCoords(node.Value.X)
+		newGrid[y][x].Add(gridNode)
 
-			// Add the particle to the grid
-			newGrid[y][x].Add(node)
-		}
-	}
-
-	// Remove particles outside the grid
-	for i := len(remove) - 1; i >= 0; i-- {
-		r := remove[i]
-		s.particles[r] = s.particles[len(s.particles)-1]
-		s.particles = s.particles[:len(s.particles)-1]
+		node = node.Next
 	}
 
 	s.grid = newGrid
+}
+
+func (s *Simulation) updateGridParticle(prev rl.Vector2, p *particle.Particle) {
+	prevX, prevY := s.getGridCoords(prev)
+	x, y := s.getGridCoords(p.X)
+
+	sameCell := prevX == x && prevY == y
+	if !sameCell {
+		// Remove the particle from the previous cell
+		s.grid[prevY][prevX].Delete(s.gridNodes[p.Index])
+
+		if !s.outOfBounds(x, y) {
+			// Add the particle to the new cell
+			s.grid[y][x].Add(s.gridNodes[p.Index])
+		} else {
+			delete(s.gridNodes, p.Index) // Remove the grid node
+
+			s.particles.Delete(s.particleNodes[p.Index]) // Remove the particle from the simulation
+
+			delete(s.particleNodes, p.Index) // Remove the particle's node
+			delete(s.neighbours, p.Index)    // Remove the particle's neighbours
+		}
+	}
 }

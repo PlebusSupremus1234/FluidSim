@@ -56,10 +56,11 @@ func (s *Simulation) findNeighbours(i *particle.Particle) []*particle.Particle {
 
 func (s *Simulation) appendIfValid(f []*particle.Particle, i *particle.Particle, l *list.List) []*particle.Particle {
 	// Loop through the linked list and append the particle if it is a valid neighbour
-	head := l.Head
 
-	for head != nil {
-		j := head.Value
+	node := l.Head
+
+	for node != nil {
+		j := node.Value
 
 		rij := rl.Vector2Subtract(i.X, j.X)
 		magSq := rl.Vector2LenSqr(rij)
@@ -69,25 +70,8 @@ func (s *Simulation) appendIfValid(f []*particle.Particle, i *particle.Particle,
 			f = append(f, j)
 		}
 
-		head = head.Next
+		node = node.Next
 	}
 
 	return f
-}
-
-func (s *Simulation) updateGridParticle(prev rl.Vector2, p *particle.Particle) {
-	prevX, prevY := s.getGridCoords(prev)
-	x, y := s.getGridCoords(p.X)
-
-	sameCell := prevX == x && prevY == y
-
-	if !sameCell {
-		// Remove the particle from the previous cell
-		s.grid[prevY][prevX].Delete(s.nodes[p.Index])
-
-		if !s.outOfBounds(x, y) {
-			// Add the particle to the new cell
-			s.grid[y][x].Add(s.nodes[p.Index])
-		}
-	}
 }

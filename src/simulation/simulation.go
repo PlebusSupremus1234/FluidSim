@@ -9,10 +9,12 @@ import (
 )
 
 type Simulation struct {
-	particles  []*particle.Particle         // Simulation particles
+	particles  *list.List                   // Simulation particles
 	neighbours map[int][]*particle.Particle // Particle neighbours
 	grid       [][]*list.List               // Grid for faster neighbour lookup
-	nodes      map[int]*list.Node           // Linked list nodes for each particle
+
+	particleNodes map[int]*list.Node // Linked list particle nodes for each particle
+	gridNodes     map[int]*list.Node // Linked list grid nodes for each particle
 
 	h float32 // Radius
 
@@ -44,9 +46,11 @@ func New(h, cols, rows, width, height float32) *Simulation {
 	hf64 := float64(h)
 
 	s := &Simulation{
-		particles:  []*particle.Particle{},
+		particles:  list.NewList(),
 		neighbours: make(map[int][]*particle.Particle),
-		nodes:      make(map[int]*list.Node),
+
+		particleNodes:  make(map[int]*list.Node),
+		gridNodes:  make(map[int]*list.Node),
 
 		h: h,
 

@@ -10,37 +10,27 @@ func (s *Simulation) Run() {
 	// Compute pressure forces
 	s.computePressForces()
 
-	// Draw scene
-	s.drawScene(s.particles)
-
 	// Integrate and draw the particles
-	for _, p := range s.particles {
+	particleCount := 0
+
+	node := s.particles.Head
+	for node != nil {
+		p := node.Value
 		prev := p.X
 
-		p.Integrate(s.dt)
+		p.Integrate(s.dt) // Integrate
 
-		if p.X.X < s.h {
-			p.V.X *= -0.5
-			p.X.X = s.h
-		}
+		s.enforceBoundaries(p) // Enforce boundaries
 
-		if p.X.X > s.viewW-s.h {
-			p.V.X *= -0.5
-			p.X.X = s.viewW - s.h
-		}
+		s.updateGridParticle(prev, p) // Update the grid
 
-		if p.X.Y < s.h {
-			p.V.Y *= -0.5
-			p.X.Y = s.h
-		}
+		particleCount++ // Increment particle count
 
-		if p.X.Y > s.viewH-s.h {
-			p.V.Y *= -0.5
-			p.X.Y = s.viewH - s.h
-		}
+		p.Draw() // Draw
 
-		s.updateGridParticle(prev, p)
-
-		p.Draw()
+		node = node.Next
 	}
+
+	// Draw scene
+	s.drawScene(particleCount)
 }
