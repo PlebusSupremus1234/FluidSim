@@ -21,6 +21,7 @@ func (s *Simulation) SpawnParticles() {
 			badX := (x+s.h > s.viewW) || (x-s.h < 0)
 			badY := (y+s.h > s.viewH) || (y-s.h < 0)
 
+			// Spawn the particle if its in bounds
 			if !badX && !badY {
 				newParticle := particle.New(x, y, s.index)
 

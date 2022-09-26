@@ -28,20 +28,6 @@ func (l *List) Print() {
 	fmt.Println()
 }
 
-func (l *List) Length() int {
-	// Return the length of the list
-
-	count := 0
-	node := l.Head
-
-	for node != nil {
-		count++
-		node = node.Next
-	}
-
-	return count
-}
-
 func (l *List) Add(node *Node) {
 	// Add the node to the end of the list
 
