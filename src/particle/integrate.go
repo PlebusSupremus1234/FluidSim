@@ -5,7 +5,6 @@ import (
 )
 
 func (p *Particle) Integrate(dt float32) {
-	// Integrate the laws of motion
-	p.V = rl.Vector2Add(p.V, rl.Vector2Scale(p.A, dt/p.Rho))
+	// Integrate the particle's position
 	p.X = rl.Vector2Add(p.X, rl.Vector2Scale(p.V, dt))
 }

@@ -29,7 +29,6 @@ func (s *Simulation) computeDensityPressure() {
 
 		i.Rho = density                        // Density
 		i.P = s.stiffness * (i.Rho/s.rho0 - 1) // Pressure
-		i.A = rl.Vector2Zero()                 // Reset acceleration
 
 		node = node.Next
 	}
@@ -60,7 +59,8 @@ func (s *Simulation) computeNonPressForces() {
 		Fgravity := rl.Vector2Scale(s.gravity, i.M/i.Rho)
 
 		sum := rl.Vector2Add(viscForce, Fgravity)
-		i.A = rl.Vector2Add(i.A, sum)
+
+		i.V = rl.Vector2Add(i.V, rl.Vector2Scale(sum, s.dt/i.Rho))
 
 		node = node.Next
 	}
@@ -89,7 +89,7 @@ func (s *Simulation) computePressForces() {
 
 		pressureForce = rl.Vector2Scale(pressureForce, -i.M*i.M)
 
-		i.A = rl.Vector2Add(i.A, pressureForce)
+		i.V = rl.Vector2Add(i.V, rl.Vector2Scale(pressureForce, s.dt/i.Rho))
 
 		node = node.Next
 	}
