@@ -47,18 +47,16 @@ func (s *Simulation) computeNonPressForces() {
 
 		for _, j := range s.neighbours[i.Index] {
 			rij := rl.Vector2Subtract(i.X, j.X)
-			mag := rl.Vector2Length(rij)
+			vij := rl.Vector2Subtract(i.V, j.V)
 
-			vji := rl.Vector2Subtract(j.V, i.V)
-
-			Wlap := s.viscLap(mag)
+			Wlap := s.viscLap(rl.Vector2Length(rij))
 
 			// Compute viscosity force
 			multiplierV := j.M / j.Rho * Wlap
-			viscForce = rl.Vector2Add(viscForce, rl.Vector2Scale(vji, multiplierV))
+			viscForce = rl.Vector2Add(viscForce, rl.Vector2Scale(vij, multiplierV))
 		}
 
-		viscForce = rl.Vector2Scale(viscForce, s.nu)
+		viscForce = rl.Vector2Scale(viscForce, -i.M*s.nu)
 		Fgravity := rl.Vector2Scale(s.gravity, i.M/i.Rho)
 
 		sum := rl.Vector2Add(viscForce, Fgravity)
@@ -80,11 +78,9 @@ func (s *Simulation) computePressForces() {
 
 		for _, j := range s.neighbours[i.Index] {
 			rij := rl.Vector2Subtract(i.X, j.X)
-			mag := rl.Vector2Length(rij)
-
 			normalized := rl.Vector2Normalize(rij)
 
-			Wgrad := s.spikyGrad(mag)
+			Wgrad := s.spikyGrad(rl.Vector2Length(rij))
 
 			// Compute pressure force
 			multiplier := (i.P/(i.Rho*i.Rho) + j.P/(j.Rho*j.Rho)) * Wgrad

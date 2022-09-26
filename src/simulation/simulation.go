@@ -56,7 +56,7 @@ func New(h, cols, rows, width, height float32) *Simulation {
 		rho0:      1000,
 		stiffness: -7000,
 
-		nu: 200,
+		nu: 50,
 
 		gravity: rl.NewVector2(0, 9.81),
 		dt:      0.0007,
