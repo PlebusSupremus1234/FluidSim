@@ -10,8 +10,8 @@ import (
 func (s *Simulation) SpawnParticles() {
 	// Spawn particles in a 10x10 grid around the mouse
 
-	for i := -5; i <= 5; i++ {
-		for j := -5; j <= 5; j++ {
+	for i := -5; i < 5; i++ {
+		for j := -5; j < 5; j++ {
 			mousePos := rl.GetMousePosition()
 			mX, mY := mousePos.X, mousePos.Y
 
