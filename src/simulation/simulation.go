@@ -33,6 +33,11 @@ type Simulation struct {
 
 	index int // Latest particle index
 
+	scale float32 // Scale factor for the simulation
+
+	simW float32 // Simulation width
+	simH float32 // Simulation height
+
 	viewW float32 // View width
 	viewH float32 // View height
 
@@ -41,7 +46,7 @@ type Simulation struct {
 	rows float32
 }
 
-func New(h, cols, rows, width, height float32) *Simulation {
+func New(h, simW, simH, viewW, viewH float32) *Simulation {
 	hf64 := float64(h)
 
 	s := &Simulation{
@@ -67,11 +72,16 @@ func New(h, cols, rows, width, height float32) *Simulation {
 
 		index: 0,
 
-		viewW: width,
-		viewH: height,
+		scale: viewW / simW,
 
-		cols: cols,
-		rows: rows,
+		simW: simW,
+		simH: simH,
+
+		viewW: viewW,
+		viewH: viewH,
+
+		cols: float32(math.Ceil(float64(simW / h))),
+		rows: float32(math.Ceil(float64(simH / h))),
 	}
 
 	s.initGrid()

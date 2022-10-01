@@ -6,19 +6,21 @@ import (
 )
 
 func main() {
-	var h float32 = 16                     // Particle width
-	var cols, rows float32 = 106, 50       // Grid size
-	var width, height = cols * h, rows * h // Simulation size
+	var h float32 = 16 // Particle width
+
+	var simW, simH float32 = 1696, 800   // Simulation size
+	var viewW, viewH float32 = 1696, 800 // Viewport size
 
 	simulation := sim.New(
 		h,
-		cols, rows,
-		width, height,
+
+		simW, simH,
+		viewW, viewH,
 	)
 
 	spaceDown := false
 
-	rl.InitWindow(int32(width), int32(height), "Fluid Simulation")
+	rl.InitWindow(int32(viewW), int32(viewH), "Fluid Simulation")
 	rl.SetTargetFPS(60)
 
 	for !rl.WindowShouldClose() {

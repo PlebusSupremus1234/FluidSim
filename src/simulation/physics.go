@@ -5,9 +5,8 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+// Compute the particle's density and pressure
 func (s *Simulation) computeDensityPressure() {
-	// Compute the particle's density and pressure
-
 	node := s.particles.Head
 
 	for node != nil {
@@ -19,13 +18,12 @@ func (s *Simulation) computeDensityPressure() {
 
 		for _, j := range neighbours {
 			rij := rl.Vector2Subtract(i.X, j.X)
-			magSq := rl.Vector2LenSqr(rij)
-			W := s.poly6(magSq)
+			W := s.poly6(rij)
 
 			density += j.M * W
 		}
 
-		density += i.M * s.poly6(0) // Self
+		density += i.M * s.poly6(rl.Vector2Zero()) // Self
 
 		i.Rho = density                        // Density
 		i.P = s.stiffness * (i.Rho/s.rho0 - 1) // Pressure
@@ -34,21 +32,20 @@ func (s *Simulation) computeDensityPressure() {
 	}
 }
 
+// Compute non-pressure forces
 func (s *Simulation) computeNonPressForces() {
-	// Compute non-pressure forces
-
 	node := s.particles.Head
 
 	for node != nil {
 		i := node.Value
 
-		viscForce := rl.Vector2Zero()
+		viscForce := rl.Vector2Zero() // Viscosity force
 
 		for _, j := range s.neighbours[i.Index] {
 			rij := rl.Vector2Subtract(i.X, j.X)
 			vij := rl.Vector2Subtract(i.V, j.V)
 
-			Wlap := s.viscLap(rl.Vector2Length(rij))
+			Wlap := s.viscLap(rij)
 
 			// Compute viscosity force
 			multiplierV := j.M / j.Rho * Wlap
@@ -66,25 +63,22 @@ func (s *Simulation) computeNonPressForces() {
 	}
 }
 
+// Compute pressure forces
 func (s *Simulation) computePressForces() {
-	// Compute pressure forces
-
 	node := s.particles.Head
 
 	for node != nil {
 		i := node.Value
 
 		pressureForce := rl.Vector2Zero()
-
 		for _, j := range s.neighbours[i.Index] {
 			rij := rl.Vector2Subtract(i.X, j.X)
-			normalized := rl.Vector2Normalize(rij)
 
-			Wgrad := s.spikyGrad(rl.Vector2Length(rij))
+			Wgrad := s.spikyGrad(rij)
 
 			// Compute pressure force
-			multiplier := (i.P/(i.Rho*i.Rho) + j.P/(j.Rho*j.Rho)) * Wgrad
-			pressureForce = rl.Vector2Add(pressureForce, rl.Vector2Scale(normalized, multiplier))
+			multiplier := i.P/(i.Rho*i.Rho) + j.P/(j.Rho*j.Rho)
+			pressureForce = rl.Vector2Add(pressureForce, rl.Vector2Scale(Wgrad, multiplier))
 		}
 
 		pressureForce = rl.Vector2Scale(pressureForce, -i.M*i.M)
@@ -95,17 +89,16 @@ func (s *Simulation) computePressForces() {
 	}
 }
 
+// Enforce boundaries
 func (s *Simulation) enforceBoundaries(p *particle.Particle) {
-	// Enforce boundaries
-
 	if p.X.X < s.h {
 		p.V.X *= -0.5
 		p.X.X = s.h
 	}
 
-	if p.X.X > s.viewW-s.h {
+	if p.X.X > s.simW-s.h {
 		p.V.X *= -0.5
-		p.X.X = s.viewW - s.h
+		p.X.X = s.simW - s.h
 	}
 
 	if p.X.Y < s.h {
@@ -113,8 +106,33 @@ func (s *Simulation) enforceBoundaries(p *particle.Particle) {
 		p.X.Y = s.h
 	}
 
-	if p.X.Y > s.viewH-s.h {
+	if p.X.Y > s.simH-s.h {
 		p.V.Y *= -0.5
-		p.X.Y = s.viewH - s.h
+		p.X.Y = s.simH - s.h
 	}
+}
+
+// Integrate and draw particles
+func (s *Simulation) integrateAndDraw() int {
+	particleCount := 0
+
+	node := s.particles.Head
+	for node != nil {
+		p := node.Value
+		prev := p.X
+
+		p.Integrate(s.dt) // Integrate
+
+		s.enforceBoundaries(p) // Enforce boundaries
+
+		s.updateGridParticle(prev, p) // Update the grid
+
+		particleCount++ // Increment particle count
+
+		p.Draw(s.scale) // Draw
+
+		node = node.Next
+	}
+
+	return particleCount
 }

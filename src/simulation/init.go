@@ -13,13 +13,13 @@ func (s *Simulation) SpawnParticles() {
 	for i := -5; i < 5; i++ {
 		for j := -5; j < 5; j++ {
 			mousePos := rl.GetMousePosition()
-			mX, mY := mousePos.X, mousePos.Y
+			mX, mY := mousePos.X/s.scale, mousePos.Y/s.scale
 
-			x := mX + float32(j)*s.h + rand.Float32()
-			y := mY + float32(i)*s.h + rand.Float32()
+			x := mX + float32(j)*s.h + rand.Float32()/2
+			y := mY + float32(i)*s.h + rand.Float32()/2
 
-			badX := (x+s.h > s.viewW) || (x-s.h < 0)
-			badY := (y+s.h > s.viewH) || (y-s.h < 0)
+			badX := (x+s.h > s.simW) || (x-s.h < 0)
+			badY := (y+s.h > s.simH) || (y-s.h < 0)
 
 			// Spawn the particle if its in bounds
 			if !badX && !badY {
