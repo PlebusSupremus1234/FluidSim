@@ -13,8 +13,8 @@ type Simulation struct {
 	neighbours map[int][]*particle.Particle // Particle neighbours
 	grid       [][]*list.List               // Grid for faster neighbour lookup
 
-	particleNodes map[int]*list.Node // Linked list particle nodes for each particle
-	gridNodes     map[int]*list.Node // Linked list grid nodes for each particle
+	particleNodes map[int]*list.Node // Particle nodes for the particles
+	gridNodes     map[int]*list.Node // Particle nodes for the grid
 
 	h float32 // Radius
 
@@ -44,6 +44,14 @@ type Simulation struct {
 	// Number of grid columns and rows
 	cols float32
 	rows float32
+
+	// User interactivity
+	spaceDown bool
+
+	firstMouseDown bool
+	mouseDown      bool
+
+	mouseInteractionRadius float32
 }
 
 func New(h, simW, simH, viewW, viewH float32) *Simulation {
@@ -82,6 +90,8 @@ func New(h, simW, simH, viewW, viewH float32) *Simulation {
 
 		cols: float32(math.Ceil(float64(simW / h))),
 		rows: float32(math.Ceil(float64(simH / h))),
+
+		mouseInteractionRadius: 100,
 	}
 
 	s.initGrid()

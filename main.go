@@ -18,8 +18,6 @@ func main() {
 		viewW, viewH,
 	)
 
-	spaceDown := false
-
 	rl.InitWindow(int32(viewW), int32(viewH), "Fluid Simulation")
 	rl.SetTargetFPS(60)
 
@@ -27,16 +25,6 @@ func main() {
 		rl.BeginDrawing()
 
 		rl.ClearBackground(rl.Black)
-
-		if rl.IsKeyDown(rl.KeySpace) {
-			if !spaceDown {
-				simulation.SpawnParticles()
-
-				spaceDown = true
-			}
-		} else {
-			spaceDown = false
-		}
 
 		simulation.Run()
 

@@ -7,9 +7,8 @@ import (
 	"math/rand"
 )
 
-func (s *Simulation) SpawnParticles() {
-	// Spawn particles in a 10x10 grid around the mouse
-
+// Spawn particles in a 10x10 grid around the mouse
+func (s *Simulation) spawnParticles() {
 	for i := -5; i < 5; i++ {
 		for j := -5; j < 5; j++ {
 			mousePos := rl.GetMousePosition()

@@ -55,7 +55,29 @@ func (s *Simulation) computeNonPressForces() {
 		viscForce = rl.Vector2Scale(viscForce, -i.M*s.nu)
 		Fgravity := rl.Vector2Scale(s.gravity, i.M/i.Rho)
 
-		sum := rl.Vector2Add(viscForce, Fgravity)
+		sum := rl.Vector2Add(Fgravity, viscForce)
+
+		// Calculate user interaction forces
+		if s.mouseDown && !s.firstMouseDown {
+			mousePos := rl.GetMousePosition()
+			prevPos := rl.Vector2Subtract(mousePos, rl.GetMouseDelta())
+			dist := rl.Vector2Distance(i.X, prevPos)
+			//dist := rl.Vector2Distance(i.X, mousePos)
+
+			rl.DrawLineV(mousePos, prevPos, rl.Red)
+
+			if dist < s.mouseInteractionRadius {
+				// Frictional force
+				sum = rl.Vector2Scale(sum, 0.9)
+
+				// Attraction force
+				//sum = rl.Vector2Add(sum, rl.Vector2Scale(rl.Vector2Subtract(mousePos, i.X), 200))
+
+				// Drag force
+				//sum = rl.Vector2Add(sum, rl.GetMouseDelta())
+				sum = rl.Vector2Add(sum, rl.Vector2Scale(rl.GetMouseDelta(), 1000))
+			}
+		}
 
 		i.V = rl.Vector2Add(i.V, rl.Vector2Scale(sum, s.dt/i.Rho))
 

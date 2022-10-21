@@ -1,6 +1,10 @@
 package simulation
 
 func (s *Simulation) Run() {
+	// User interactivity
+	s.spawnIfSpacePressed()
+	s.userForces()
+
 	// Compute density and pressure
 	s.computeDensityPressure()
 
